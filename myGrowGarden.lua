@@ -2,7 +2,7 @@ local player = game.Players.LocalPlayer
 local Plants = {
     ORANGE_TULIP = "Orange Tulip"
 }
-function collectAllFruits()
+function collectAllPlants()
    local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
@@ -107,8 +107,8 @@ local mainTab = Window:CreateTab("Main")
 local menusTab = Window:CreateTab("Menus")
 
 local collectFruitsButton = mainTab:CreateButton({
-	Name = "Collect All Fruit",
-	Callback = collectAllFruits
+	Name = "Collect All Plants",
+	Callback = collectAllPlants
 })
 
 local toggleEasterMenuButton = menusTab:CreateButton({
