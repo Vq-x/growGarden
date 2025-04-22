@@ -82,11 +82,13 @@ function autoPlantSeeds()
 				-- teleport user to their farm
 				for _, farm in pairs(workspace.Farm:GetChildren()) do
 					if farm.Important.Data.Owner.Value == player.Name then
-						for _, plantable in pairs(farm.Important.Plant_Locations:GetChildren()) do
-							if plantable.Name == "Can_Plant" then
-								player.Character.HumanoidRootPart.CFrame = CFrame.new(plantable.Position) + Vector3.new(0, 5, 0)
-							end
-						end
+						-- for _, plantable in pairs(farm.Important.Plant_Locations:GetChildren()) do
+						local plantable = filter(farm.Important.Plant_Locations:GetChildren(), function(v)
+							return v.Name == "Can_Plant"
+						end)
+						local randomPlantable = plantable[math.random(1, #plantable)]
+							
+						player.Character.HumanoidRootPart.CFrame = CFrame.new(randomPlantable.Position) + Vector3.new(0, 5, 0)
 					end
 				end
 				-- bring the seed to the players hand
@@ -185,22 +187,24 @@ function plantOnFarm()
 
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
-			for _, plantable in pairs(Farm.Important.Plant_Locations:GetChildren()) do
-				if plantable.Name == "Can_Plant" then
-					local randomPlantablePosition = Vector3.new(
-						math.random(
-							plantable.Position.X - plantable.Size.X / 2,
-							plantable.Position.X + plantable.Size.X / 2
-						),
-						0,
-						math.random(
-							plantable.Position.Z - plantable.Size.Z / 2,
-							plantable.Position.Z + plantable.Size.Z / 2
-						)
-					)
-					plant(randomPlantablePosition.X, randomPlantablePosition.Z, toolInPlayerHand:GetAttribute("Seed"))
-				end
-			end
+
+			local plantable = filter(Farm.Important.Plant_Locations:GetChildren(), function(v)
+				return v.Name == "Can_Plant"
+			end)
+			local randomPlantable = plantable[math.random(1, #plantable)]
+			
+			local randomPlantablePosition = Vector3.new(
+				math.random(
+					randomPlantable.Position.X - randomPlantable.Size.X / 2,
+					randomPlantable.Position.X + randomPlantable.Size.X / 2
+				),
+				0,
+				math.random(
+					randomPlantable.Position.Z - randomPlantable.Size.Z / 2,
+					randomPlantable.Position.Z + randomPlantable.Size.Z / 2
+				)
+			)
+			plant(randomPlantablePosition.X, randomPlantablePosition.Z, toolInPlayerHand:GetAttribute("Seed"))
 		end
 	end
 end
