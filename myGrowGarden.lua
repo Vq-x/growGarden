@@ -6,16 +6,15 @@ local Plants = {
 	CARROT = "Carrot",
 }
 
-
 function filter(sequence, predicate)
 	local newlist = {}
 	for i, v in ipairs(sequence) do
-	  if predicate(v) then
-		table.insert(newlist, v)
-	  end
+		if predicate(v) then
+			table.insert(newlist, v)
+		end
 	end
 	return newlist
-  end
+end
 
 function instantHarvestAura()
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
@@ -54,13 +53,24 @@ end
 
 function buySeed(seed, amount)
 	local args = {
-		[1] = seed
+		[1] = seed,
 	}
 	for i = 1, amount do
-		game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("BuySeedStock"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("GameEvents")
+			:WaitForChild("BuySeedStock")
+			:FireServer(unpack(args))
 	end
 end
 
+function buyEasterStock(seed, amount)
+	local args = {
+		[1] = seed,
+	}
+	for i = 1, amount do
+		game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("BuyEasterStock"):FireServer(unpack(args))
+	end
+end
 
 function autoSellPlants()
 	local seedsInInventory = player.Backpack:GetChildren()
@@ -77,7 +87,6 @@ function autoPlantSeeds()
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, seed in pairs(seedsInInventory) do
 		if seed:IsA("Tool") and seed:GetAttribute("ITEM_TYPE") == "Seed" then
-			
 			if table.find(_G.autoPlantSeedsList, seed:GetAttribute("Seed")) then
 				-- teleport user to their farm
 				for _, farm in pairs(workspace.Farm:GetChildren()) do
@@ -87,8 +96,9 @@ function autoPlantSeeds()
 							return v.Name == "Can_Plant"
 						end)
 						local randomPlantable = plantable[math.random(1, #plantable)]
-							
-						player.Character.HumanoidRootPart.CFrame = CFrame.new(randomPlantable.Position) + Vector3.new(0, 5, 0)
+
+						player.Character.HumanoidRootPart.CFrame = CFrame.new(randomPlantable.Position)
+							+ Vector3.new(0, 5, 0)
 					end
 				end
 				-- bring the seed to the players hand
@@ -105,7 +115,6 @@ function autoPlantSeeds()
 			end
 		end
 	end
-	
 end
 
 function autoBuySeeds()
@@ -187,12 +196,11 @@ function plantOnFarm()
 
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
-
 			local plantable = filter(Farm.Important.Plant_Locations:GetChildren(), function(v)
 				return v.Name == "Can_Plant"
 			end)
 			local randomPlantable = plantable[math.random(1, #plantable)]
-			
+
 			local randomPlantablePosition = Vector3.new(
 				math.random(
 					randomPlantable.Position.X - randomPlantable.Size.X / 2,
@@ -407,17 +415,15 @@ local autoSellPlantsToggle = mainTab:CreateToggle({
 
 local autoSellPlantsAmount = mainTab:CreateSlider({
 	Name = "Auto Sell Plants Amount",
-   Range = {0, 100},
-   Increment = 5,
-   Suffix = "Plants",
-   CurrentValue = 10,
-   Flag = "autoSellPlantsAmount",
-   Callback = function(Value)
+	Range = { 0, 100 },
+	Increment = 5,
+	Suffix = "Plants",
+	CurrentValue = 10,
+	Flag = "autoSellPlantsAmount",
+	Callback = function(Value)
 		_G.autoSellPlantsAmount = Value
-   end,
+	end,
 })
-
-
 
 local destroyGuiButton = mainTab:CreateButton({
 	Name = "Destroy GUI",
