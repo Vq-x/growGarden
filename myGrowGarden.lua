@@ -21,12 +21,58 @@ function instantHarvestAura()
 	end
 end
 
+function getInStockSeeds()
+	local inStockSeeds = {}
+	for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Seed_Shop.Frame.ScrollingFrame:GetDescendants()) do
+		if v:IsA("Frame") then
+			if v.Name == "In_Stock" and v.Visible then
+				table.insert(inStockSeeds, v.Parent.Parent.Parent.Name)
+			end
+		end
+	end
+	return inStockSeeds
+end
+
 function listPlantNames()
 	local plantNames = {}
 	for _, seed in pairs(game:GetService("ReplicatedStorage").Seed_Models:GetChildren()) do
 		table.insert(plantNames, seed.Name)
 	end
 	return plantNames
+end
+
+function buySeed(seed, amount)
+	local args = {
+		[1] = seed
+	}
+	for i = 1, amount do
+		game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("BuySeedStock"):FireServer(unpack(args))
+	end
+end
+
+function autoPlantSeeds()
+	local seedsInInventory = player.Backpack:GetChildren()
+	for _, seed in pairs(seedsInInventory) do
+		if seed:IsA("Tool") and seed:GetAttribute("ITEM_TYPE") == "Seed" then			
+			if table.find(_G.autoPlantSeedsList, seed:GetAttribute("Seed")) then
+				seed.Parent = player.Character
+				for i = 1, 50 do
+					plantOnFarm()
+					task.wait(0.1)
+				end
+				seed.Parent = player.Backpack
+			end
+		end
+	end
+end
+
+function autoBuySeeds()
+	local inStockSeeds = getInStockSeeds()
+	for _, seed in pairs(inStockSeeds) do
+		if table.find(_G.autoBuySeedsList, seed) then
+			buySeed(seed, 50)
+		end
+	end
 end
 
 function collectAllPlants()
@@ -222,8 +268,29 @@ local plantOnFarmButton = mainTab:CreateButton({
 	Callback = plantOnFarm,
 })
 
-local autoBuySeedsList = mainTab:CreateDropdown({
+local autoBuySeedsToggle = mainTab:CreateToggle({
 	Name = "Auto Buy Seeds",
+	CurrentValue = false,
+	Flag = "autoBuySeedsToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoBuySeedsTask = task.spawn(function()
+				while true do
+					autoBuySeeds()
+					task.wait(5)
+				end
+			end)
+		else
+			if _G.autoBuySeedsTask then
+				task.cancel(_G.autoBuySeedsTask)
+				_G.autoBuySeedsTask = nil
+			end
+		end
+	end,
+})
+
+local autoBuySeedsList = mainTab:CreateDropdown({
+	Name = "Select Seeds to Auto Buy",
 	Options = listPlantNames(),
 	CurrentOption = listPlantNames()[1],
 	MultipleOptions = true,
@@ -237,9 +304,44 @@ local autoBuySeedsList = mainTab:CreateDropdown({
 				Image = 4483362458,
 			})
 		end
-		
+		_G.autoBuySeedsList = Options
 	end,
- })
+})
+
+local autoPlantSeedsToggle = mainTab:CreateToggle({
+	Name = "Auto Plant Seeds",
+	CurrentValue = false,
+	Flag = "autoPlantSeedsToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoPlantSeedsTask = task.spawn(function()
+				while true do
+					autoPlantSeeds()
+					task.wait(0.1)
+				end
+			end)
+		else
+			if _G.autoPlantSeedsTask then
+				task.cancel(_G.autoPlantSeedsTask)
+				_G.autoPlantSeedsTask = nil
+			end
+		end
+	end,
+})
+
+local autoPlantSeedsList = mainTab:CreateDropdown({
+	Name = "Auto Plant Seeds",
+	Options = listPlantNames(),
+	CurrentOption = listPlantNames()[1],
+	MultipleOptions = true,
+	Flag = "autoPlantSeedsList",
+	Callback = function(Options)
+		_G.autoPlantSeedsList = Options
+	end,
+})
+
+
+
 
 local destroyGuiButton = mainTab:CreateButton({
 	Name = "Destroy GUI",
