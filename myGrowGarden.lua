@@ -11,7 +11,8 @@ function collectAllPlants()
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				for _, v in pairs(plant:GetDescendants()) do
-					if v:IsA("ProximityPrompt") and v.Enabled == true then
+					if v:IsA("ProximityPrompt") then
+						v.Enabled = true
 						player.Character.HumanoidRootPart.CFrame = CFrame.new(v.Parent.CFrame.Position)
 							+ Vector3.new(0, 3, 0)
 						task.wait(0.1)
@@ -142,7 +143,7 @@ local mainTab = Window:CreateTab("Main")
 local menusTab = Window:CreateTab("Menus")
 
 local collectFruitsButton = mainTab:CreateButton({
-	Name = "Collect All Plants",
+	Name = "Collect All Plants (even if not fully grown)",
 	Callback = collectAllPlants,
 })
 
