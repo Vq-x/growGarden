@@ -6,6 +6,17 @@ local Plants = {
 	CARROT = "Carrot",
 }
 
+
+function filter(sequence, predicate)
+	local newlist = {}
+	for i, v in ipairs(sequence) do
+	  if predicate(v) then
+		table.insert(newlist, v)
+	  end
+	end
+	return newlist
+  end
+
 function instantHarvestAura()
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
@@ -50,6 +61,17 @@ function buySeed(seed, amount)
 	end
 end
 
+
+function autoSellPlants()
+	local seedsInInventory = player.Backpack:GetChildren()
+	local plantsInInventory = filter(seedsInInventory:GetChildren(), function(v)
+		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
+	end)
+	if #plantsInInventory > _G.autoSellPlantsAmount then
+		sellInventory()
+	end
+end
+
 function autoPlantSeeds()
 	local seedsInInventory = player.Backpack:GetChildren()
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
@@ -69,7 +91,7 @@ function autoPlantSeeds()
 				end
 				-- bring the seed to the players hand
 				seed.Parent = player.Character
-				for i = 1, 50 do
+				for i = 1, 10 do
 					plantOnFarm()
 					task.wait(0.1)
 				end
@@ -358,6 +380,38 @@ local autoPlantSeedsList = mainTab:CreateDropdown({
 	end,
 })
 
+local autoSellPlantsToggle = mainTab:CreateToggle({
+	Name = "Auto Sell Plants",
+	CurrentValue = false,
+	Flag = "autoSellPlantsToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoSellPlantsTask = task.spawn(function()
+				while true do
+					autoSellPlants()
+					task.wait(0.1)
+				end
+			end)
+		else
+			if _G.autoSellPlantsTask then
+				task.cancel(_G.autoSellPlantsTask)
+				_G.autoSellPlantsTask = nil
+			end
+		end
+	end,
+})
+
+local autoSellPlantsAmount = mainTab:CreateSlider({
+	Name = "Auto Sell Plants Amount",
+   Range = {0, 100},
+   Increment = 5,
+   Suffix = "Plants",
+   CurrentValue = 10,
+   Flag = "autoSellPlantsAmount",
+   Callback = function(Value)
+		_G.autoSellPlantsAmount = Value
+   end,
+})
 
 
 
