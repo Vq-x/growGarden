@@ -75,19 +75,20 @@ function plantOnFarm()
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plantable in pairs(Farm.Important.Plant_Locations:GetChildren()) do
-				if plantable:IsA("Model") then continue end
-				local randomPlantablePosition = Vector3.new(
-					math.random(
-						plantable.Position.X - plantable.Size.X / 2,
-						plantable.Position.X + plantable.Size.X / 2
-					),
-					0,
-					math.random(
-						plantable.Position.Z - plantable.Size.Z / 2,
-						plantable.Position.Z + plantable.Size.Z / 2
+				if plantable.Name == "Can_Plant" then
+					local randomPlantablePosition = Vector3.new(
+						math.random(
+							plantable.Position.X - plantable.Size.X / 2,
+							plantable.Position.X + plantable.Size.X / 2
+						),
+						0,
+						math.random(
+							plantable.Position.Z - plantable.Size.Z / 2,
+							plantable.Position.Z + plantable.Size.Z / 2
+						)
 					)
-				)
-				plant(randomPlantablePosition.X, randomPlantablePosition.Z, toolInPlayerHand:GetAttribute("Seed"))
+					plant(randomPlantablePosition.X, randomPlantablePosition.Z, toolInPlayerHand:GetAttribute("Seed"))
+				end
 			end
 		end
 	end
