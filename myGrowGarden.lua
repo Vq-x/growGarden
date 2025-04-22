@@ -21,7 +21,7 @@ end
 function sellInventory()
    local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
    player.Character.HumanoidRootPart.CFrame = CFrame.new(workspace.NPCS["Sell Stands"].PrimaryPart.Position)
-   task.wait(5)
+   task.wait(1)
    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
    player.Character.HumanoidRootPart.CFrame = originalCFrame
 end
