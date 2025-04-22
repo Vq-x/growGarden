@@ -64,7 +64,7 @@ end
 
 function autoSellPlants()
 	local seedsInInventory = player.Backpack:GetChildren()
-	local plantsInInventory = filter(seedsInInventory:GetChildren(), function(v)
+	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	if #plantsInInventory > _G.autoSellPlantsAmount then
@@ -266,7 +266,7 @@ local instantHarvestAuraToggle = mainTab:CreateToggle({
 			_G.instantHarvestThread = task.spawn(function()
 				while true do
 					instantHarvestAura()
-					task.wait(0.1)
+					task.wait(0.25)
 				end
 			end)
 		else
