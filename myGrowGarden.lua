@@ -5,6 +5,22 @@ local Plants = {
 	ORANGE_TULIP = "Orange Tulip",
 	CARROT = "Carrot",
 }
+
+function instantHarvestAura()
+	for _, Farm in pairs(workspace.Farm:GetChildren()) do
+		if Farm.Important.Data.Owner.Value == player.Name then
+			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
+				for _, v in pairs(plant:GetDescendants()) do
+					if v:IsA("ProximityPrompt") then
+						v.Enabled = true
+						fireproximityprompt(v)
+					end
+				end
+			end
+		end
+	end
+end
+
 function collectAllPlants()
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
@@ -145,6 +161,27 @@ local menusTab = Window:CreateTab("Menus")
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Plants (even if not fully grown)",
 	Callback = collectAllPlants,
+})
+
+local instantHarvestAuraToggle = mainTab:CreateToggle({
+	Name = "Instant Harvest Aura",
+	CurrentValue = false,
+	Flag = "instantHarvestAuraToggle",
+	Callback = function(Value)
+		if Value then
+			_G.instantHarvestThread = task.spawn(function()
+				while true do
+					instantHarvestAura()
+					task.wait(0.1)
+				end
+			end)
+		else
+			if _G.instantHarvestThread then
+				task.cancel(_G.instantHarvestThread)
+				_G.instantHarvestThread = nil
+			end
+		end
+	end,
 })
 
 local toggleEasterMenuButton = menusTab:CreateButton({
