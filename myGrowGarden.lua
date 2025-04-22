@@ -1,4 +1,7 @@
 local player = game.Players.LocalPlayer
+local Plants = {
+    ORANGE_TULIP = "Orange Tulip"
+}
 function collectAllFruits()
    local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
@@ -26,6 +29,22 @@ function sellInventory()
    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Sell_Inventory"):FireServer()
    task.wait(1)
    player.Character.HumanoidRootPart.CFrame = originalCFrame
+end
+
+function toggleEasterMenu()
+   player.PlayerGui["Easter_Shop"].Enabled = not player.PlayerGui["Easter_Shop"].Enabled
+end
+
+
+function plant(x, z, plant: string)
+   local args = {
+      [1] = Vector3.new(x, 0.1355254054069519, z),
+      [2] = plant
+  }
+  
+  game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Plant_RE"):FireServer(unpack(args))
+  
+
 end
 
 
@@ -83,6 +102,11 @@ local mainTab = Window:CreateTab("Main")
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Fruit",
 	Callback = collectAllFruits
+})
+
+local toggleEasterMenuButton = mainTab:CreateButton({
+	Name = "Toggle Easter Shop",
+	Callback = toggleEasterMenu
 })
 
 local sellInventoryButton = mainTab:CreateButton({
