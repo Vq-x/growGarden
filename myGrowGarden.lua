@@ -52,18 +52,36 @@ end
 
 function autoPlantSeeds()
 	local seedsInInventory = player.Backpack:GetChildren()
+	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, seed in pairs(seedsInInventory) do
-		if seed:IsA("Tool") and seed:GetAttribute("ITEM_TYPE") == "Seed" then			
+		if seed:IsA("Tool") and seed:GetAttribute("ITEM_TYPE") == "Seed" then
+			
 			if table.find(_G.autoPlantSeedsList, seed:GetAttribute("Seed")) then
+				-- teleport user to their farm
+				for _, farm in pairs(workspace.Farm:GetChildren()) do
+					if farm.Important.Data.Owner.Value == player.Name then
+						for _, plantable in pairs(farm.Important.Plant_Locations:GetChildren()) do
+							if plantable.Name == "Can_Plant" then
+								player.Character.HumanoidRootPart.CFrame = CFrame.new(plantable.Position) + Vector3.new(0, 5, 0)
+							end
+						end
+					end
+				end
+				-- bring the seed to the players hand
 				seed.Parent = player.Character
 				for i = 1, 50 do
 					plantOnFarm()
 					task.wait(0.1)
 				end
-				seed.Parent = player.Backpack
+				-- put the seed back in the players inventory
+				if seed:FindFirstChild("Handle") then
+					seed.Parent = player.Backpack
+				end
+				player.Character.HumanoidRootPart.CFrame = originalCFrame
 			end
 		end
 	end
+	
 end
 
 function autoBuySeeds()
