@@ -1,12 +1,13 @@
 local player = game.Players.LocalPlayer
 function collectAllFruits()
-   local originalCFrame = player.Character.HumanoidRootPart.CFrame
+   local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				for _, v in pairs(plant:GetDescendants()) do
 					if v:IsA("ProximityPrompt") and v.Enabled == true then
-                  player.Character.HumanoidRootPart.CFrame = v.Parent.CFrame
+                  player.Character.HumanoidRootPart.CFrame = CFrame.new(v.Parent.CFrame.Position)
+                  task.wait(0.1)
 						fireproximityprompt(v)
                   task.wait(0.1)
 					end
