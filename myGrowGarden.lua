@@ -21,6 +21,14 @@ function instantHarvestAura()
 	end
 end
 
+function listPlantNames()
+	local plantNames = {}
+	for _, seed in pairs(game:GetService("ReplicatedStorage").Seed_Models:GetChildren()) do
+		table.insert(plantNames, seed.Name)
+	end
+	return plantNames
+end
+
 function collectAllPlants()
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
@@ -213,6 +221,25 @@ local plantOnFarmButton = mainTab:CreateButton({
 	Name = "Plant On Farm",
 	Callback = plantOnFarm,
 })
+
+local autoBuySeedsList = mainTab:CreateDropdown({
+	Name = "Auto Buy Seeds",
+	Options = listPlantNames(),
+	CurrentOption = listPlantNames()[1],
+	MultipleOptions = true,
+	Flag = "autoBuySeedsList", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Options)
+		if #Options ~= 0 then
+			Rayfield:Notify({
+				Title = "Auto Buy Seeds",
+				Content = "Auto buying seeds for " .. table.concat(Options, ", "),
+				Duration = 6.5,
+				Image = 4483362458,
+			})
+		end
+		
+	end,
+ })
 
 local destroyGuiButton = mainTab:CreateButton({
 	Name = "Destroy GUI",
