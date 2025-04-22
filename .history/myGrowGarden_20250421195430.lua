@@ -60,7 +60,7 @@ function collectAllFruits()
 					player.Character.HumanoidRootPart.CFrame = fruitLocation
 					for _, v in pairs(plant:GetDescendants()) do
 						if v:IsA("ProximityPrompt") then
-                     task.wait(0.1)
+                     task.wait(1)
                      print("fired")
 							fireproximityprompt(v)
 						end
