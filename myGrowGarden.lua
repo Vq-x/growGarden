@@ -122,6 +122,7 @@ function autoBuySeeds()
 	for _, seed in pairs(inStockSeeds) do
 		if table.find(_G.autoBuySeedsList, seed) then
 			buySeed(seed, 50)
+			buyEasterStock(seed, 50)
 		end
 	end
 end
