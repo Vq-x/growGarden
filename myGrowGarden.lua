@@ -35,6 +35,13 @@ function toggleEasterMenu()
    player.PlayerGui["Easter_Shop"].Enabled = not player.PlayerGui["Easter_Shop"].Enabled
 end
 
+function toggleGearShop()
+   player.PlayerGui["Gear_Shop"].Enabled = not player.PlayerGui["Gear_Shop"].Enabled
+end
+
+function toggleSeedShop()
+   player.PlayerGui["Seed_Shop"].Enabled = not player.PlayerGui["Seed_Shop"].Enabled
+end
 
 function plant(x, z, plant: string)
    local args = {
@@ -43,8 +50,6 @@ function plant(x, z, plant: string)
   }
   
   game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Plant_RE"):FireServer(unpack(args))
-  
-
 end
 
 
@@ -99,14 +104,26 @@ local Window = Rayfield:CreateWindow({
 
 local mainTab = Window:CreateTab("Main")
 
+local menusTab = Window:CreateTab("Menus")
+
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Fruit",
 	Callback = collectAllFruits
 })
 
-local toggleEasterMenuButton = mainTab:CreateButton({
+local toggleEasterMenuButton = menusTab:CreateButton({
 	Name = "Toggle Easter Shop",
 	Callback = toggleEasterMenu
+})
+
+local toggleGearShopButton = menusTab:CreateButton({
+	Name = "Toggle Gear Shop",
+	Callback = toggleGearShop
+})
+
+local toggleSeedShopButton = menusTab:CreateButton({
+	Name = "Toggle Seed Shop",
+	Callback = toggleSeedShop
 })
 
 local sellInventoryButton = mainTab:CreateButton({
