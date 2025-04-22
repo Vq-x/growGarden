@@ -1,3 +1,38 @@
+local player = game.Players.LocalPlayer
+function collectAllFruits()
+	for _, Farm in pairs(workspace.Farm:GetChildren()) do
+		if Farm.Important.Data.Owner.Value == player.Name then
+			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
+				while #plant.Fruits:GetChildren() > 0 do
+					local fruitLocation = plant.Fruits:GetChildren()[1].PrimaryPart.CFrame
+					player.Character.HumanoidRootPart.CFrame = fruitLocation
+					for _, v in pairs(plant:GetDescendants()) do
+						if v:IsA("ProximityPrompt") then
+                     task.wait(0.1)
+                     print("fired")
+							fireproximityprompt(v)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -50,23 +85,3 @@ local destroyGuiButton = mainTab:CreateButton({
 
 
 
-local player = game.Players.LocalPlayer
-function collectAllFruits()
-	for _, Farm in pairs(workspace.Farm:GetChildren()) do
-		if Farm.Important.Data.Owner.Value == player.Name then
-			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
-				while #plant.Fruits:GetChildren() > 0 do
-					local fruitLocation = plant.Fruits:GetChildren()[1].PrimaryPart.CFrame
-					player.Character.HumanoidRootPart.CFrame = fruitLocation
-					for _, v in pairs(plant:GetDescendants()) do
-						if v:IsA("ProximityPrompt") then
-                     task.wait(0.1)
-                     print("fired")
-							fireproximityprompt(v)
-						end
-					end
-				end
-			end
-		end
-	end
-end
