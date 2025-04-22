@@ -77,6 +77,7 @@ function autoSellPlants()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
+	-- print("Plants in inventory: " .. #plantsInInventory)
 	if #plantsInInventory > _G.autoSellPlantsAmount then
 		sellInventory()
 	end
@@ -402,7 +403,7 @@ local autoSellPlantsToggle = mainTab:CreateToggle({
 			_G.autoSellPlantsTask = task.spawn(function()
 				while true do
 					autoSellPlants()
-					task.wait(0.1)
+					task.wait(5)
 				end
 			end)
 		else
