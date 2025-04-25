@@ -125,6 +125,7 @@ function autoSellPlants()
 	end)
 	local numberOfPlantsInInventory = plantsInInventory and #plantsInInventory or 0
 	-- print("Plants in inventory: " .. numberOfPlantsInInventory)
+	if not _G.autoSellPlantsAmount then _G.autoSellPlantsAmount = 20 end -- Initialize default value
 	if numberOfPlantsInInventory > _G.autoSellPlantsAmount then
 		_G.selling = true
 		sellInventory()
@@ -546,9 +547,11 @@ local autoSellPlantsAmount = autoFarmTab:CreateSlider({
 	CurrentValue = 20,
 	Flag = "autoSellPlantsAmount",
 	Callback = function(Value)
+		if not Value then Value = 20 end -- Ensure Value is never nil
 		_G.autoSellPlantsAmount = Value
 	end,
 })
+_G.autoSellPlantsAmount = 20 -- Initialize the global variable
 
 
 
