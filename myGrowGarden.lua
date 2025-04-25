@@ -97,13 +97,16 @@ function buyEasterStock(seed, amount)
 end
 
 function autoSellPlants()
+	
 	local seedsInInventory = player.Backpack:GetChildren()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	-- print("Plants in inventory: " .. #plantsInInventory)
 	if #plantsInInventory > _G.autoSellPlantsAmount then
+		_G.selling = true
 		sellInventory()
+		_G.selling = false
 	end
 end
 
@@ -381,7 +384,9 @@ local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
 				while true do
 					autoCollectPlants()
 					task.wait(_G.autoCollectPlantsInterval)
-					
+					while _G.selling do
+						task.wait(0.1)
+					end
 				end
 			end)
 		else
