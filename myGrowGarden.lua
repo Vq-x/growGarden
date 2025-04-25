@@ -1,5 +1,13 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
+
+local guy = game:service "VirtualUser"
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+	guy:CaptureController()
+	guy:ClickButton2(Vector2.new()) -- this clicks a thing to stop ur dumb 20 min idle kick lol have fun roblox
+	task.wait(2)
+end)
+
 local player = game.Players.LocalPlayer
 local Plants = {
 	ORANGE_TULIP = "Orange Tulip",
@@ -390,15 +398,15 @@ local sellInventoryButton = mainTab:CreateButton({
 	Callback = sellInventory,
 })
 
-local plantOnPlayerButton = mainTab:CreateButton({
-	Name = "Plant On Player",
-	Callback = plantOnPlayer,
-})
+-- local plantOnPlayerButton = mainTab:CreateButton({
+-- 	Name = "Plant On Player",
+-- 	Callback = plantOnPlayer,
+-- })
 
-local plantOnFarmButton = mainTab:CreateButton({
-	Name = "Plant On Farm",
-	Callback = plantOnFarm,
-})
+-- local plantOnFarmButton = mainTab:CreateButton({
+-- 	Name = "Plant On Farm",
+-- 	Callback = plantOnFarm,
+-- })
 
 local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Collect Plants",
