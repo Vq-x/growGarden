@@ -595,3 +595,6 @@ local destroyGuiButton = mainTab:CreateButton({
 		Rayfield:Destroy()
 	end,
 })
+
+
+Rayfield:LoadConfiguration()
