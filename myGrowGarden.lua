@@ -68,6 +68,13 @@ function getInStockSeeds()
 			end
 		end
 	end
+	for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Easter_Shop.Frame.ScrollingFrame:GetDescendants()) do
+		if v:IsA("Frame") then
+			if v.Name == "In_Stock" and v.Visible then
+				table.insert(inStockSeeds, v.Parent.Parent.Parent.Name)
+			end
+		end
+	end
 	return inStockSeeds
 end
 
@@ -92,6 +99,8 @@ function buySeed(seed, amount)
 end
 
 function buyEasterStock(seed, amount)
+	print("buying easter stock")
+	print(seed)
 	local args = {
 		[1] = seed,
 	}
@@ -159,23 +168,26 @@ end
 
 
 function removePlantsAura()
+	player.Character.Humanoid:UnequipTools()
 	local found = false
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				if plant:IsA("Model") and table.find(_G.removePlantsAuraList, plant.Name) then
-					if not found then
-						player.Backpack["Shovel [Destroy Plants]"].Parent = player.Character
+					print("Model: " .. plant.Name)
+					if found == false then
+						task.wait(0.5)
+						player.Character.Humanoid:EquipTool(player.Backpack["Shovel [Destroy Plants]"])
+						task.wait(0.5)
 						found = true
 					end
-					
 					removePlant(plant.PrimaryPart)
-					
 				end
 			end
 		end
 	end
 	if found then
+		task.wait(1)
 		player.Character.Humanoid:UnequipTools()
 		task.wait(0.1)
 		found = false
@@ -186,8 +198,8 @@ function autoBuySeeds()
 	local inStockSeeds = getInStockSeeds()
 	for _, seed in pairs(inStockSeeds) do
 		if table.find(_G.autoBuySeedsList, seed) then
-			buySeed(seed, 50)
-			buyEasterStock(seed, 50)
+			buySeed(seed, 5)
+			buyEasterStock(seed, 5)
 		end
 	end
 end
