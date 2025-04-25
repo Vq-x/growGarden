@@ -32,6 +32,7 @@ function autoCollectPlants()
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, proximityPrompt in pairs(proximityPrompts) do
 		while _G.selling do
+			player.Character.HumanoidRootPart.CFrame = CFrame.new(workspace.NPCS["Sell Stands"].PrimaryPart.Position)
 			task.wait(0.1)
 		end
 		player.Character.HumanoidRootPart.CFrame = CFrame.new(proximityPrompt) + Vector3.new(0, 5, 0)
@@ -100,7 +101,7 @@ function buyEasterStock(seed, amount)
 end
 
 function autoSellPlants()
-	
+
 	local seedsInInventory = player.Backpack:GetChildren()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
@@ -497,7 +498,7 @@ local autoSellPlantsToggle = autoFarmTab:CreateToggle({
 			_G.autoSellPlantsTask = task.spawn(function()
 				while true do
 					autoSellPlants()
-					task.wait(5)
+					task.wait(1)
 				end
 			end)
 		else
