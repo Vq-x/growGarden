@@ -18,7 +18,6 @@ end
 
 function autoCollectPlants()
 	local proximityPrompts = {}
-	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
@@ -30,13 +29,15 @@ function autoCollectPlants()
 			end
 		end
 	end
+	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, proximityPrompt in pairs(proximityPrompts) do
 		player.Character.HumanoidRootPart.CFrame = CFrame.new(proximityPrompt) + Vector3.new(0, 5, 0)
 		task.wait(0.1)
 		instantHarvestAura()
 		task.wait(0.1)
+		player.Character.HumanoidRootPart.CFrame = originalCFrame
 	end
-	player.Character.HumanoidRootPart.CFrame = originalCFrame
+	
 end
 
 function instantHarvestAura()
@@ -281,13 +282,13 @@ local Window = Rayfield:CreateWindow({
 	LoadingSubtitle = "by Tyler",
 	Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
-	DisableRayfieldPrompts = false,
+	DisableRayfieldPrompts = true,
 	DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
 	ConfigurationSaving = {
 		Enabled = true,
 		FolderName = nil, -- Create a custom folder for your hub/game
-		FileName = "Big Hub",
+		FileName = "Grow Garden",
 	},
 
 	Discord = {
@@ -380,6 +381,7 @@ local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
 				while true do
 					autoCollectPlants()
 					task.wait(_G.autoCollectPlantsInterval)
+					
 				end
 			end)
 		else
@@ -502,7 +504,7 @@ local autoSellPlantsAmount = autoFarmTab:CreateSlider({
 	Range = { 0, 100 },
 	Increment = 5,
 	Suffix = "Plants",
-	CurrentValue = 10,
+	CurrentValue = 20,
 	Flag = "autoSellPlantsAmount",
 	Callback = function(Value)
 		_G.autoSellPlantsAmount = Value
