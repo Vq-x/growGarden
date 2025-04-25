@@ -164,8 +164,11 @@ function removePlantsAura()
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				if plant:IsA("Model") and table.find(_G.removePlantsAuraList, plant.Name) then
-					found = true
-					player.Backpack["Shovel [Destroy Plants]"].Parent = player.Character
+					if not found then
+						player.Backpack["Shovel [Destroy Plants]"].Parent = player.Character
+						found = true
+					end
+					
 					removePlant(plant.PrimaryPart)
 					
 				end
