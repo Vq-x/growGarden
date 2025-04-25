@@ -159,16 +159,23 @@ end
 
 
 function removePlantsAura()
+	local found = false
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				if plant:IsA("Model") and table.find(_G.removePlantsAuraList, plant.Name) then
+					found = true
 					player.Backpack["Shovel [Destroy Plants]"].Parent = player.Character
 					removePlant(plant.PrimaryPart)
-					player.Character.Humanoid:UnequipTools()
+					
 				end
 			end
 		end
+	end
+	if found then
+		player.Character.Humanoid:UnequipTools()
+		task.wait(0.1)
+		found = false
 	end
 end
 
