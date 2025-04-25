@@ -16,6 +16,29 @@ function filter(sequence, predicate)
 	return newlist
 end
 
+function autoCollectPlants()
+	local proximityPrompts = {}
+	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
+	for _, Farm in pairs(workspace.Farm:GetChildren()) do
+		if Farm.Important.Data.Owner.Value == player.Name then
+			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
+				for _, v in pairs(plant:GetDescendants()) do
+					if v:IsA("ProximityPrompt") and v.Parent:IsA("Part")then
+						table.insert(proximityPrompts, v.Parent.Position)
+					end
+				end
+			end
+		end
+	end
+	for _, proximityPrompt in pairs(proximityPrompts) do
+		player.Character.HumanoidRootPart.CFrame = CFrame.new(proximityPrompt) + Vector3.new(0, 5, 0)
+		task.wait(0.1)
+		instantHarvestAura()
+		task.wait(0.1)
+	end
+	player.Character.HumanoidRootPart.CFrame = originalCFrame
+end
+
 function instantHarvestAura()
 	for _, Farm in pairs(workspace.Farm:GetChildren()) do
 		if Farm.Important.Data.Owner.Value == player.Name then
@@ -113,6 +136,29 @@ function autoPlantSeeds()
 					seed.Parent = player.Backpack
 				end
 				player.Character.HumanoidRootPart.CFrame = originalCFrame
+			end
+		end
+	end
+end
+
+function removePlant(plant)
+	local args = {
+		[1] = plant,
+	}
+
+	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Remove_Item"):FireServer(unpack(args))
+end
+
+
+function removePlantsAura()
+	for _, Farm in pairs(workspace.Farm:GetChildren()) do
+		if Farm.Important.Data.Owner.Value == player.Name then
+			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
+				if plant:IsA("Model") and table.find(_G.removePlantsAuraList, plant.Name) then
+					player.Backpack["Shovel [Destroy Plants]"].Parent = player.Character
+					removePlant(plant.PrimaryPart)
+					player.Character.Humanoid:UnequipTools()
+				end
 			end
 		end
 	end
@@ -266,6 +312,8 @@ local mainTab = Window:CreateTab("Main")
 
 local menusTab = Window:CreateTab("Menus")
 
+local autoFarmTab = Window:CreateTab("Auto Farm")
+
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Plants (even if not fully grown)",
 	Callback = collectAllPlants,
@@ -322,7 +370,41 @@ local plantOnFarmButton = mainTab:CreateButton({
 	Callback = plantOnFarm,
 })
 
-local autoBuySeedsToggle = mainTab:CreateToggle({
+local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
+	Name = "Auto Collect Plants",
+	CurrentValue = false,
+	Flag = "autoCollectPlantsToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoCollectPlantsTask = task.spawn(function()
+				while true do
+					autoCollectPlants()
+					task.wait(_G.autoCollectPlantsInterval)
+				end
+			end)
+		else
+			if _G.autoCollectPlantsTask then
+				task.cancel(_G.autoCollectPlantsTask)
+				_G.autoCollectPlantsTask = nil
+			end
+		end
+	end,
+})
+
+local autoCollectPlantsInterval = autoFarmTab:CreateSlider({
+	Name = "Auto Collect Plants Interval",
+	Range = { 1, 60 },
+	Increment = 1,
+	Suffix = "Seconds",
+	CurrentValue = 5,
+	Flag = "autoCollectPlantsInterval",
+	Callback = function(Value)
+		_G.autoCollectPlantsInterval = Value
+	end,
+})
+
+
+local autoBuySeedsToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Buy Seeds",
 	CurrentValue = false,
 	Flag = "autoBuySeedsToggle",
@@ -343,10 +425,10 @@ local autoBuySeedsToggle = mainTab:CreateToggle({
 	end,
 })
 
-local autoBuySeedsList = mainTab:CreateDropdown({
+local autoBuySeedsList = autoFarmTab:CreateDropdown({
 	Name = "Select Seeds to Auto Buy",
 	Options = listPlantNames(),
-	CurrentOption = listPlantNames()[1],
+	CurrentOption = nil,
 	MultipleOptions = true,
 	Flag = "autoBuySeedsList", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
 	Callback = function(Options)
@@ -362,7 +444,7 @@ local autoBuySeedsList = mainTab:CreateDropdown({
 	end,
 })
 
-local autoPlantSeedsToggle = mainTab:CreateToggle({
+local autoPlantSeedsToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Plant Seeds",
 	CurrentValue = false,
 	Flag = "autoPlantSeedsToggle",
@@ -383,10 +465,10 @@ local autoPlantSeedsToggle = mainTab:CreateToggle({
 	end,
 })
 
-local autoPlantSeedsList = mainTab:CreateDropdown({
+local autoPlantSeedsList = autoFarmTab:CreateDropdown({
 	Name = "Auto Plant Seeds",
 	Options = listPlantNames(),
-	CurrentOption = listPlantNames()[1],
+	CurrentOption = nil,
 	MultipleOptions = true,
 	Flag = "autoPlantSeedsList",
 	Callback = function(Options)
@@ -394,7 +476,7 @@ local autoPlantSeedsList = mainTab:CreateDropdown({
 	end,
 })
 
-local autoSellPlantsToggle = mainTab:CreateToggle({
+local autoSellPlantsToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Sell Plants",
 	CurrentValue = false,
 	Flag = "autoSellPlantsToggle",
@@ -415,7 +497,7 @@ local autoSellPlantsToggle = mainTab:CreateToggle({
 	end,
 })
 
-local autoSellPlantsAmount = mainTab:CreateSlider({
+local autoSellPlantsAmount = autoFarmTab:CreateSlider({
 	Name = "Auto Sell Plants Amount",
 	Range = { 0, 100 },
 	Increment = 5,
@@ -426,6 +508,43 @@ local autoSellPlantsAmount = mainTab:CreateSlider({
 		_G.autoSellPlantsAmount = Value
 	end,
 })
+
+
+
+local removePlantsAuraToggle = autoFarmTab:CreateToggle({
+	Name = "Remove Plants Aura",
+	CurrentValue = false,
+	Flag = "removePlantsAuraToggle",
+	Callback = function(Value)
+		if Value then
+			_G.removePlantsAuraTask = task.spawn(function()
+				while true do
+					removePlantsAura()
+					task.wait(0.25)
+				end
+			end)
+		else
+			if _G.removePlantsAuraTask then
+				task.cancel(_G.removePlantsAuraTask)
+				_G.removePlantsAuraTask = nil
+			end
+		end
+	end,
+})
+
+local removePlantsAuraList = autoFarmTab:CreateDropdown({
+	Name = "Remove Plants Aura",
+	Options = listPlantNames(),
+	CurrentOption = nil,
+	MultipleOptions = true,
+	Flag = "removePlantsAuraList",
+	Callback = function(Options)
+		_G.removePlantsAuraList = Options
+	end,
+})
+
+
+
 
 local destroyGuiButton = mainTab:CreateButton({
 	Name = "Destroy GUI",
