@@ -31,6 +31,9 @@ function autoCollectPlants()
 	end
 	local originalCFrame = CFrame.new(player.Character.HumanoidRootPart.Position)
 	for _, proximityPrompt in pairs(proximityPrompts) do
+		while _G.selling do
+			task.wait(0.1)
+		end
 		player.Character.HumanoidRootPart.CFrame = CFrame.new(proximityPrompt) + Vector3.new(0, 5, 0)
 		task.wait(0.1)
 		instantHarvestAura()
@@ -382,11 +385,13 @@ local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
 		if Value then
 			_G.autoCollectPlantsTask = task.spawn(function()
 				while true do
-					autoCollectPlants()
-					task.wait(_G.autoCollectPlantsInterval)
 					while _G.selling do
 						task.wait(0.1)
 					end
+					autoCollectPlants()
+					
+					task.wait(_G.autoCollectPlantsInterval)
+					
 				end
 			end)
 		else
