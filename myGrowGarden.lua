@@ -118,8 +118,8 @@ function buyEasterStock(seed, amount)
 end
 
 function autoSellPlants()
-
-	local seedsInInventory = player.Backpack:GetChildren()
+	local backpack = player.Backpack or player:WaitForChild("Backpack")
+	local seedsInInventory = backpack:GetChildren()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
