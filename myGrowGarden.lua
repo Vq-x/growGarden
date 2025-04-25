@@ -261,21 +261,9 @@ end
 function plantOnFarm()
 	local toolInPlayerHand = player.Character:FindFirstChildWhichIsA("Tool")
 	if not toolInPlayerHand then
-		Rayfield:Notify({
-			Title = "Nothing in hand",
-			Content = "Please hold a tool in your hand to plant",
-			Duration = 6.5,
-			Image = 4483362458,
-		})
 		return
 	else
 		if toolInPlayerHand:GetAttribute("ITEM_TYPE") ~= "Seed" then
-			Rayfield:Notify({
-				Title = "Wrong tool",
-				Content = "Please hold a seed in your hand to plant",
-				Duration = 6.5,
-				Image = 4483362458,
-			})
 			return
 		end
 	end
