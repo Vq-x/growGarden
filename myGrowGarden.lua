@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 
-local guy = game:service "VirtualUser"
+local guy = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
 	guy:CaptureController()
 	guy:ClickButton2(Vector2.new()) -- this clicks a thing to stop ur dumb 20 min idle kick lol have fun roblox
