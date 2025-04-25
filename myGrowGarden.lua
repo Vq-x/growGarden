@@ -123,8 +123,8 @@ function autoSellPlants()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
-	local numberOfPlantsInInventory = #plantsInInventory or 0
-	-- print("Plants in inventory: " .. #plantsInInventory)
+	local numberOfPlantsInInventory = plantsInInventory and #plantsInInventory or 0
+	-- print("Plants in inventory: " .. numberOfPlantsInInventory)
 	if numberOfPlantsInInventory > _G.autoSellPlantsAmount then
 		_G.selling = true
 		sellInventory()
