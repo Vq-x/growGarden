@@ -124,7 +124,7 @@ function autoSellPlants()
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	-- print("Plants in inventory: " .. #plantsInInventory)
-	if #plantsInInventory > _G.autoSellPlantsAmount then
+	if #plantsInInventory or 0 > _G.autoSellPlantsAmount then
 		_G.selling = true
 		sellInventory()
 		_G.selling = false
