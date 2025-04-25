@@ -254,6 +254,10 @@ function toggleSeedShop()
 	player.PlayerGui["Seed_Shop"].Enabled = not player.PlayerGui["Seed_Shop"].Enabled
 end
 
+function toggleDailyQuests()
+	game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled = not game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled
+end
+
 function plantOnPlayer()
 	plant(player.Character.HumanoidRootPart.Position.X, player.Character.HumanoidRootPart.Position.Z, Plants.CARROT)
 end
@@ -369,6 +373,11 @@ local instantHarvestAuraToggle = mainTab:CreateToggle({
 local toggleEasterMenuButton = menusTab:CreateButton({
 	Name = "Toggle Easter Shop",
 	Callback = toggleEasterMenu,
+})
+
+local toggleDailyQuestsButton = menusTab:CreateButton({
+	Name = "Toggle Daily Quests",
+	Callback = toggleDailyQuests,
 })
 
 local toggleGearShopButton = menusTab:CreateButton({
