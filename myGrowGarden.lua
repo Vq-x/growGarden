@@ -44,7 +44,7 @@ function autoFavorite()
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	for _, plant in pairs(plantsInInventory) do
-		if plant.Weight and plant.Weight.Value > _G.autoFavoriteWeight or table.find(_G.autoFavoriteVariance, plant.Variant.Value) then
+		if plant and plant:WaitForChild("Weight") and plant.Weight.Value > _G.autoFavoriteWeight or plant:GetAttribute("Variant") and table.find(_G.autoFavoriteVariance, plant:GetAttribute("Variant")) then
 			favoritePlant(plant)
 		end
 	end
@@ -75,8 +75,9 @@ function getJimRequest()
 	game:GetService("SoundService").NPC_Text.Volume = 0
 	fireproximityprompt(workspace.SeedPack.JimTheFlytrap.Model.Base.Head.ProximityPrompt)
 	local jimRequest = workspace.SeedPack.JimTheFlytrap.Model.Base.Head:WaitForChild("Talk_UI"):WaitForChild("TextLabel").Text
+	print(jimRequest)
 	if string.find(jimRequest, "Feed me a") then
-		print(jimRequest)
+		print("Found")
 		jimRequestCache = jimRequest
 		return jimRequest
 	else
@@ -120,9 +121,7 @@ function autoFeedJim()
 	
 	
 	for _, plant in pairs(plantsInInventory) do
-		print(plant:GetAttribute("ItemName") .. " " .. plantName)
 		if plant:GetAttribute("ItemName") == plantName and plant:WaitForChild("Weight") and plant.Weight.Value >= weight then
-			
 			_G.feedingJim = true
 			while plant ~= nil do
 				print("Feeding Jim")
@@ -467,6 +466,8 @@ local autoFarmTab = Window:CreateTab("Auto Farm")
 local autoFavoriteTab = Window:CreateTab("Auto Favorite")
 
 local removePlantsTab = Window:CreateTab("Remove Plants")
+
+local informationTab = Window:CreateTab("Info")
 
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Plants (even if not fully grown)",
@@ -847,5 +848,19 @@ local autoOpenSeedPackToggle = autoFarmTab:CreateToggle({
 		end
 	end,
 })
+
+local hungryPlantInfo = informationTab:CreateLabel("Hungry Plant Info", 4483362458) -- Title, Icon, Color, IgnoreTheme
+
+local hungryPlantDescription = informationTab:CreateParagraph({Title = "Hungry Plant Needs", Content = "Nil"})
+
+task.spawn(function()
+	while true do
+		task.wait(5)
+		if jimRequestCache ~= nil then
+			hungryPlantDescription:Set({Title = "Hungry Plant Needs", Content = jimRequestCache})
+		end
+		
+	end
+end)
 
 Rayfield:LoadConfiguration()
