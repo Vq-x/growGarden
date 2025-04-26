@@ -1,4 +1,5 @@
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
+
 
 
 local guy = game:GetService("VirtualUser")
@@ -22,6 +23,30 @@ function filter(sequence, predicate)
 		end
 	end
 	return newlist
+end
+
+function favoritePlant(plant)
+	local args = {
+		[1] = plant,
+	}
+	
+	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(unpack(args))
+	
+end
+
+
+function autoFavorite()
+	local backpack = player.Backpack or player:WaitForChild("Backpack")
+	local seedsInInventory = backpack:GetChildren()
+	local plantsInInventory = filter(seedsInInventory, function(v)
+		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
+	end)
+	for _, plant in pairs(plantsInInventory) do
+		if plant.Weight.Value > _G.autoFavoriteWeight then
+			favoritePlant(plant)
+		end
+	end
+
 end
 
 function autoCollectPlants()
@@ -346,6 +371,8 @@ local menusTab = Window:CreateTab("Menus")
 
 local autoFarmTab = Window:CreateTab("Auto Farm")
 
+local autoFavoriteTab = Window:CreateTab("Auto Favorite")
+
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Plants (even if not fully grown)",
 	Callback = collectAllPlants,
@@ -596,6 +623,42 @@ local destroyGuiButton = mainTab:CreateButton({
 		Rayfield:Destroy()
 	end,
 })
+local event = nil
 
+local autoFavoriteWeight = autoFavoriteTab:CreateSlider({
+	Name = "Auto if over X KGs",
+	Range = { 0, 100 },
+	Increment = 1,
+	Suffix = "KGs",
+	CurrentValue = 20,
+	Flag = "autoFavoriteWeight",
+	Callback = function(Value)
+		_G.autoFavoriteWeight = Value
+	end,
+})
+
+local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
+	Name = "Auto Favorite",
+	CurrentValue = false,
+	Flag = "autoFavoriteToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoFavoriteTask = task.spawn(function()
+				autoFavorite()
+				event = player.Backpack.ChildAdded:Connect(function(child)
+					if child:IsA("Tool") and child:GetAttribute("ITEM_TYPE") == "Holdable" then
+						autoFavorite()
+					end
+				end)
+			end)
+		else
+			if _G.autoFavoriteTask then
+				task.cancel(_G.autoFavoriteTask)
+				_G.autoFavoriteTask = nil
+				event:Disconnect()
+			end
+		end
+	end,
+})
 
 Rayfield:LoadConfiguration()
