@@ -9,6 +9,8 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
 	task.wait(2)
 end)
 
+
+
 local player = game.Players.LocalPlayer
 local Plants = {
 	ORANGE_TULIP = "Orange Tulip",
@@ -42,11 +44,102 @@ function autoFavorite()
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	for _, plant in pairs(plantsInInventory) do
-		if plant.Weight.Value > _G.autoFavoriteWeight then
+		if plant.Weight and plant.Weight.Value > _G.autoFavoriteWeight or table.find(_G.autoFavoriteVariance, plant.Variant.Value) then
 			favoritePlant(plant)
 		end
 	end
 
+end
+
+function autoOpenSeedPack()
+	local backpack = player.Backpack or player:WaitForChild("Backpack")
+	local seedsInInventory = backpack:GetChildren()
+	local seedsInInventory = filter(seedsInInventory, function(v)
+		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Seed Pack"
+	end)
+	for _, seedPack:Tool in pairs(seedsInInventory) do
+		player.Character.Humanoid:EquipTool(seedPack)
+		task.wait(0.1)
+		for i = 1, seedPack:GetAttribute("Uses") do
+			seedPack:Activate()
+			task.wait(0.1)
+		end
+		player.Character.Humanoid:UnequipTools()
+		task.wait(0.1)
+	end
+end
+
+
+local jimRequestCache = nil
+function getJimRequest()
+	game:GetService("SoundService").NPC_Text.Volume = 0
+	fireproximityprompt(workspace.SeedPack.JimTheFlytrap.Model.Base.Head.ProximityPrompt)
+	local jimRequest = workspace.SeedPack.JimTheFlytrap.Model.Base.Head:WaitForChild("Talk_UI"):WaitForChild("TextLabel").Text
+	if string.find(jimRequest, "Feed me a") then
+		print(jimRequest)
+		jimRequestCache = jimRequest
+		return jimRequest
+	else
+		return jimRequestCache
+	end
+end
+
+function parseJimRequest(jimRequest)
+	local plant, weight = jimRequest:match("Feed me a%s+([%a%s]+)%s+that weighs at least%s+([%d%.]+)kg")
+	return plant, tonumber(weight)
+end
+
+
+function autoCollectDroppedSeed()
+	for _, v in pairs(workspace:GetChildren()) do
+		if v:IsA("Model") and v:GetAttribute("OWNER") == player.Name and string.find(v.Name, "Collectable") then
+			while v ~= nil do
+				firetouchinterest(v.PrimaryPart, player.Character.HumanoidRootPart, true)
+				firetouchinterest(v.PrimaryPart, player.Character.HumanoidRootPart, false)
+				task.wait(1)
+			end
+		end
+	end
+end
+
+function giveHeldPlant()
+	local args = {
+		[1] = "SubmitHeldPlant"
+	}
+	
+	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("SeedPackGiverEvent"):FireServer(unpack(args))
+end
+
+function autoFeedJim()
+	local plantName, weight = parseJimRequest(getJimRequest())
+	local backpack = player.Backpack or player:WaitForChild("Backpack")
+	local seedsInInventory = backpack:GetChildren()
+	local plantsInInventory = filter(seedsInInventory, function(v)
+		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
+	end)
+	
+	
+	for _, plant in pairs(plantsInInventory) do
+		print(plant:GetAttribute("ItemName") .. " " .. plantName)
+		if plant:GetAttribute("ItemName") == plantName and plant:WaitForChild("Weight") and plant.Weight.Value >= weight then
+			
+			_G.feedingJim = true
+			while plant ~= nil do
+				print("Feeding Jim")
+				player.Character.Humanoid:EquipTool(plant)
+				print("Equipped")
+				task.wait(1)
+				giveHeldPlant()
+				print("Gave")
+				task.wait(1)
+				player.Character.Humanoid:UnequipTools()
+				print("Unequipped")
+				task.wait(1)
+				
+			end
+		end
+	end
+	_G.feedingJim = false
 end
 
 function autoCollectPlants()
@@ -373,6 +466,8 @@ local autoFarmTab = Window:CreateTab("Auto Farm")
 
 local autoFavoriteTab = Window:CreateTab("Auto Favorite")
 
+local removePlantsTab = Window:CreateTab("Remove Plants")
+
 local collectFruitsButton = mainTab:CreateButton({
 	Name = "Collect All Plants (even if not fully grown)",
 	Callback = collectAllPlants,
@@ -553,6 +648,9 @@ local autoSellPlantsToggle = autoFarmTab:CreateToggle({
 		if Value then
 			_G.autoSellPlantsTask = task.spawn(function()
 				while true do
+					while _G.feedingJim do
+						task.wait(0.1)
+					end
 					autoSellPlants()
 					task.wait(1)
 				end
@@ -582,7 +680,7 @@ _G.autoSellPlantsAmount = 20 -- Initialize the global variable
 
 
 
-local removePlantsAuraToggle = autoFarmTab:CreateToggle({
+local removePlantsAuraToggle = removePlantsTab:CreateToggle({
 	Name = "Remove Plants Aura",
 	CurrentValue = false,
 	Flag = "removePlantsAuraToggle",
@@ -603,7 +701,7 @@ local removePlantsAuraToggle = autoFarmTab:CreateToggle({
 	end,
 })
 
-local removePlantsAuraList = autoFarmTab:CreateDropdown({
+local removePlantsAuraList = removePlantsTab:CreateDropdown({
 	Name = "Remove Plants Aura",
 	Options = listPlantNames(),
 	CurrentOption = nil,
@@ -623,8 +721,8 @@ local destroyGuiButton = mainTab:CreateButton({
 		Rayfield:Destroy()
 	end,
 })
-local event = nil
-
+local backPackEvent = nil
+_G.autoFavoriteWeight = 20
 local autoFavoriteWeight = autoFavoriteTab:CreateSlider({
 	Name = "Auto if over X KGs",
 	Range = { 0, 100 },
@@ -637,6 +735,19 @@ local autoFavoriteWeight = autoFavoriteTab:CreateSlider({
 	end,
 })
 
+local autoFavoriteVariance = autoFavoriteTab:CreateDropdown({
+	Name = "Auto Favorite Variance",
+	Options = {"Normal", "Gold", "Rainbow"},
+	CurrentOption = "Rainbow",
+	Flag = "autoFavoriteVariance",
+	MultipleOptions = true,
+	Callback = function(Options)
+		_G.autoFavoriteVariance = Options
+	end,
+})
+
+
+
 local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
 	Name = "Auto Favorite",
 	CurrentValue = false,
@@ -645,7 +756,7 @@ local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
 		if Value then
 			_G.autoFavoriteTask = task.spawn(function()
 				autoFavorite()
-				event = player.Backpack.ChildAdded:Connect(function(child)
+				backPackEvent = player.Backpack.ChildAdded:Connect(function(child)
 					if child:IsA("Tool") and child:GetAttribute("ITEM_TYPE") == "Holdable" then
 						autoFavorite()
 					end
@@ -655,7 +766,83 @@ local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
 			if _G.autoFavoriteTask then
 				task.cancel(_G.autoFavoriteTask)
 				_G.autoFavoriteTask = nil
-				event:Disconnect()
+				backPackEvent:Disconnect()
+			end
+		end
+	end,
+})
+
+
+local workspaceEvent = nil
+local autoCollectDroppedSeedToggle = autoFarmTab:CreateToggle({
+	Name = "Auto Collect Dropped Seed",
+	CurrentValue = false,
+	Flag = "autoCollectDroppedSeedToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoCollectDroppedSeedTask = task.spawn(function()
+				autoCollectDroppedSeed()
+				workspaceEvent = workspace.ChildAdded:Connect(function(child)
+					autoCollectDroppedSeed()
+				end)
+			end)
+		else
+			if _G.autoCollectDroppedSeedTask then
+				task.cancel(_G.autoCollectDroppedSeedTask)
+				_G.autoCollectDroppedSeedTask = nil
+				workspaceEvent:Disconnect()
+			end
+		end
+	end,
+})
+
+local jimBackpackEvent = nil
+
+local autoFeedJimToggle = autoFarmTab:CreateToggle({
+	Name = "Auto Feed Jim",
+	CurrentValue = false,
+	Flag = "autoFeedJimToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoFeedJimTask = task.spawn(function()
+				autoFeedJim()
+				jimBackpackEvent = player.Backpack.ChildAdded:Connect(function(child)
+					if child:IsA("Tool") and child:GetAttribute("ITEM_TYPE") == "Holdable" then
+						autoFeedJim()
+					end
+				end)
+			end)
+		else
+			if _G.autoFeedJimTask then
+				task.cancel(_G.autoFeedJimTask)
+				_G.autoFeedJimTask = nil
+				jimBackpackEvent:Disconnect()
+			end
+		end
+	end,
+})
+
+
+local seedPackBackpackEvent = nil
+local autoOpenSeedPackToggle = autoFarmTab:CreateToggle({
+	Name = "Auto Open Seed Pack",
+	CurrentValue = false,
+	Flag = "autoOpenSeedPackToggle",
+	Callback = function(Value)
+		if Value then
+			_G.autoOpenSeedPackTask = task.spawn(function()
+				autoOpenSeedPack()
+				seedPackBackpackEvent = player.Backpack.ChildAdded:Connect(function(child)
+					if child:IsA("Tool") and child:GetAttribute("ITEM_TYPE") == "Seed Pack" then
+						autoOpenSeedPack()
+					end
+				end)
+			end)
+		else
+			if _G.autoOpenSeedPackTask then
+				task.cancel(_G.autoOpenSeedPackTask)
+				_G.autoOpenSeedPackTask = nil
+				seedPackBackpackEvent:Disconnect()
 			end
 		end
 	end,
