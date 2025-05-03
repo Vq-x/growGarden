@@ -21,6 +21,16 @@ function filter(sequence, predicate)
 	return newlist
 end
 
+local Games = {
+    ["Grow Garden"] = 7436755782,
+}
+
+local autoPlantSeedsList = nil
+
+
+--============================================================--
+--====================[ Grow Garden Script ]====================--
+--============================================================--
 -- Grow Garden Game Class
 local growGarden = {}
 growGarden.__index = growGarden
@@ -454,11 +464,9 @@ function growGarden.new()
 end
 
 
---============================================================--
---====================[ Grow Garden Script ]====================--
---============================================================--
 
-if game.GameId == 7436755782 then
+
+if game.GameId == Games["Grow Garden"] then
     -- Create an instance of the growGarden class
     local garden = growGarden.new()
 
@@ -893,4 +901,20 @@ if game.GameId == 7436755782 then
     end)
 
     Rayfield:LoadConfiguration()
+--=================================================================--
+--====================[ Grow Garden Script End]====================--
+--=================================================================--
+else
+    Rayfield:Notify({
+        Title = "Pulse Hub",
+        Content = "This script is not supported yet for this game.",
+        Duration = 6.5,
+        Image = 4483362458,
+    })
+    task.wait(6.5)
+    Rayfield:Destroy()
 end
+
+
+
+
