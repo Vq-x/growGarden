@@ -1,6 +1,5 @@
-local Rayfield = loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
-
-
+local Rayfield =
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua"))()
 
 local guy = game:GetService("VirtualUser")
 game:GetService("Players").LocalPlayer.Idled:Connect(function()
@@ -8,8 +7,6 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
 	guy:ClickButton2(Vector2.new()) -- this clicks a thing to stop ur dumb 20 min idle kick lol have fun roblox
 	task.wait(2)
 end)
-
-
 
 local player = game.Players.LocalPlayer
 local Plants = {
@@ -31,11 +28,12 @@ function favoritePlant(plant)
 	local args = {
 		[1] = plant,
 	}
-	
-	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Favorite_Item"):FireServer(unpack(args))
-	
-end
 
+	game:GetService("ReplicatedStorage")
+		:WaitForChild("GameEvents")
+		:WaitForChild("Favorite_Item")
+		:FireServer(unpack(args))
+end
 
 function autoFavorite()
 	local backpack = player.Backpack or player:WaitForChild("Backpack")
@@ -44,11 +42,13 @@ function autoFavorite()
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
 	for _, plant in pairs(plantsInInventory) do
-		if plant and plant:WaitForChild("Weight") and plant.Weight.Value > _G.autoFavoriteWeight or plant:GetAttribute("Variant") and table.find(_G.autoFavoriteVariance, plant:GetAttribute("Variant")) then
+		if
+			plant and plant:WaitForChild("Weight") and plant.Weight.Value > _G.autoFavoriteWeight
+			or plant:GetAttribute("Variant") and table.find(_G.autoFavoriteVariance, plant:GetAttribute("Variant"))
+		then
 			favoritePlant(plant)
 		end
 	end
-
 end
 
 function autoOpenSeedPack()
@@ -57,7 +57,7 @@ function autoOpenSeedPack()
 	local seedsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Seed Pack"
 	end)
-	for _, seedPack:Tool in pairs(seedsInInventory) do
+	for _, seedPack in pairs(seedsInInventory) do
 		player.Character.Humanoid:EquipTool(seedPack)
 		task.wait(0.1)
 		for i = 1, seedPack:GetAttribute("Uses") do
@@ -69,12 +69,12 @@ function autoOpenSeedPack()
 	end
 end
 
-
 local jimRequestCache = nil
 function getJimRequest()
 	game:GetService("SoundService").NPC_Text.Volume = 0
 	fireproximityprompt(workspace.SeedPack.JimTheFlytrap.Model.Base.Head.ProximityPrompt)
-	local jimRequest = workspace.SeedPack.JimTheFlytrap.Model.Base.Head:WaitForChild("Talk_UI"):WaitForChild("TextLabel").Text
+	local jimRequest =
+		workspace.SeedPack.JimTheFlytrap.Model.Base.Head:WaitForChild("Talk_UI"):WaitForChild("TextLabel").Text
 	print(jimRequest)
 	if string.find(jimRequest, "Feed me a") then
 		print("Found")
@@ -90,7 +90,6 @@ function parseJimRequest(jimRequest)
 	return plant, tonumber(weight)
 end
 
-
 function autoCollectDroppedSeed()
 	for _, v in pairs(workspace:GetChildren()) do
 		if v:IsA("Model") and v:GetAttribute("OWNER") == player.Name and string.find(v.Name, "Collectable") then
@@ -105,10 +104,40 @@ end
 
 function giveHeldPlant()
 	local args = {
-		[1] = "SubmitHeldPlant"
+		[1] = "SubmitHeldPlant",
 	}
-	
-	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("SeedPackGiverEvent"):FireServer(unpack(args))
+
+	game:GetService("ReplicatedStorage")
+		:WaitForChild("GameEvents")
+		:WaitForChild("SeedPackGiverEvent")
+		:FireServer(unpack(args))
+end
+
+function extractAdjectives(inputString)
+	-- Look for text inside the first square brackets
+	local adjList = inputString:match("%[(.-)%]")
+
+	-- If we found adjectives, split them by comma and trim whitespace
+	if adjList then
+		local result = {}
+		for adj in adjList:gmatch("([^,]+)") do
+			-- Trim whitespace
+			adj = adj:match("^%s*(.-)%s*$")
+			table.insert(result, adj)
+		end
+		return result
+	else
+		return {}
+	end
+end
+
+function wordInStringFromList(inputString, list)
+	for _, word in pairs(list) do
+		if not string.find(inputString, word) then
+			return false
+		end
+	end
+	return true
 end
 
 function autoFeedJim()
@@ -118,23 +147,22 @@ function autoFeedJim()
 	local plantsInInventory = filter(seedsInInventory, function(v)
 		return v:IsA("Tool") and v:GetAttribute("ITEM_TYPE") == "Holdable" and v:GetAttribute("Favorite") ~= true
 	end)
-	
-	
+
 	for _, plant in pairs(plantsInInventory) do
-		if plant:GetAttribute("ItemName") == plantName and plant:WaitForChild("Weight") and plant.Weight.Value >= weight then
+		if
+			plant:GetAttribute("ItemName") == plantName
+			and plant:WaitForChild("Weight")
+			and plant.Weight.Value >= weight
+			and wordInStringFromList(plant.Name, extractAdjectives(plantName))
+		then
 			_G.feedingJim = true
 			while plant ~= nil do
-				print("Feeding Jim")
 				player.Character.Humanoid:EquipTool(plant)
-				print("Equipped")
 				task.wait(1)
 				giveHeldPlant()
-				print("Gave")
 				task.wait(1)
 				player.Character.Humanoid:UnequipTools()
-				print("Unequipped")
 				task.wait(1)
-				
 			end
 		end
 	end
@@ -147,7 +175,7 @@ function autoCollectPlants()
 		if Farm.Important.Data.Owner.Value == player.Name then
 			for _, plant in pairs(Farm.Important.Plants_Physical:GetChildren()) do
 				for _, v in pairs(plant:GetDescendants()) do
-					if v:IsA("ProximityPrompt") and v.Parent:IsA("Part")then
+					if v:IsA("ProximityPrompt") and v.Parent:IsA("Part") then
 						table.insert(proximityPrompts, v.Parent.Position)
 					end
 				end
@@ -166,7 +194,6 @@ function autoCollectPlants()
 		task.wait(0.1)
 		player.Character.HumanoidRootPart.CFrame = originalCFrame
 	end
-	
 end
 
 function instantHarvestAura()
@@ -193,7 +220,9 @@ function getInStockSeeds()
 			end
 		end
 	end
-	for _, v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.Easter_Shop.Frame.ScrollingFrame:GetDescendants()) do
+	for _, v in
+		pairs(game:GetService("Players").LocalPlayer.PlayerGui.Easter_Shop.Frame.ScrollingFrame:GetDescendants())
+	do
 		if v:IsA("Frame") then
 			if v.Name == "In_Stock" and v.Visible then
 				table.insert(inStockSeeds, v.Parent.Parent.Parent.Name)
@@ -230,7 +259,10 @@ function buyEasterStock(seed, amount)
 		[1] = seed,
 	}
 	for i = 1, amount do
-		game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("BuyEasterStock"):FireServer(unpack(args))
+		game:GetService("ReplicatedStorage")
+			:WaitForChild("GameEvents")
+			:WaitForChild("BuyEasterStock")
+			:FireServer(unpack(args))
 	end
 end
 
@@ -242,7 +274,9 @@ function autoSellPlants()
 	end)
 	local numberOfPlantsInInventory = plantsInInventory and #plantsInInventory or 0
 	-- print("Plants in inventory: " .. numberOfPlantsInInventory)
-	if not _G.autoSellPlantsAmount then _G.autoSellPlantsAmount = 20 end -- Initialize default value
+	if not _G.autoSellPlantsAmount then
+		_G.autoSellPlantsAmount = 20
+	end -- Initialize default value
 	if numberOfPlantsInInventory > _G.autoSellPlantsAmount then
 		_G.selling = true
 		sellInventory()
@@ -292,7 +326,6 @@ function removePlant(plant)
 
 	game:GetService("ReplicatedStorage"):WaitForChild("GameEvents"):WaitForChild("Remove_Item"):FireServer(unpack(args))
 end
-
 
 function removePlantsAura()
 	player.Character.Humanoid:UnequipTools()
@@ -374,7 +407,8 @@ function toggleSeedShop()
 end
 
 function toggleDailyQuests()
-	game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled = not game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled
+	game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled =
+		not game:GetService("Players").LocalPlayer.PlayerGui.DailyQuests_UI.Enabled
 end
 
 function plantOnPlayer()
@@ -447,10 +481,10 @@ local Window = Rayfield:CreateWindow({
 
 	KeySystem = false, -- Set this to true to use our key system
 	KeySettings = {
-		Title = "Untitled",
-		Subtitle = "Key System",
+		Title = "Grow Garden",
+		Subtitle = "by Tyler",
 		Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-		FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+		FileName = "GrowGardenKey", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
 		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
 		GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
 		Key = { "Hello" }, -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
@@ -542,9 +576,8 @@ local autoCollectPlantsToggle = autoFarmTab:CreateToggle({
 						task.wait(0.1)
 					end
 					autoCollectPlants()
-					
+
 					task.wait(_G.autoCollectPlantsInterval)
-					
 				end
 			end)
 		else
@@ -567,7 +600,6 @@ local autoCollectPlantsInterval = autoFarmTab:CreateSlider({
 		_G.autoCollectPlantsInterval = Value
 	end,
 })
-
 
 local autoBuySeedsToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Buy Seeds",
@@ -673,13 +705,13 @@ local autoSellPlantsAmount = autoFarmTab:CreateSlider({
 	CurrentValue = 20,
 	Flag = "autoSellPlantsAmount",
 	Callback = function(Value)
-		if not Value then Value = 20 end -- Ensure Value is never nil
+		if not Value then
+			Value = 20
+		end -- Ensure Value is never nil
 		_G.autoSellPlantsAmount = Value
 	end,
 })
 _G.autoSellPlantsAmount = 20 -- Initialize the global variable
-
-
 
 local removePlantsAuraToggle = removePlantsTab:CreateToggle({
 	Name = "Remove Plants Aura",
@@ -713,9 +745,6 @@ local removePlantsAuraList = removePlantsTab:CreateDropdown({
 	end,
 })
 
-
-
-
 local destroyGuiButton = mainTab:CreateButton({
 	Name = "Destroy GUI",
 	Callback = function()
@@ -738,7 +767,7 @@ local autoFavoriteWeight = autoFavoriteTab:CreateSlider({
 
 local autoFavoriteVariance = autoFavoriteTab:CreateDropdown({
 	Name = "Auto Favorite Variance",
-	Options = {"Normal", "Gold", "Rainbow"},
+	Options = { "Normal", "Gold", "Rainbow" },
 	CurrentOption = "Rainbow",
 	Flag = "autoFavoriteVariance",
 	MultipleOptions = true,
@@ -746,8 +775,6 @@ local autoFavoriteVariance = autoFavoriteTab:CreateDropdown({
 		_G.autoFavoriteVariance = Options
 	end,
 })
-
-
 
 local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
 	Name = "Auto Favorite",
@@ -772,7 +799,6 @@ local autoFavoriteToggle = autoFavoriteTab:CreateToggle({
 		end
 	end,
 })
-
 
 local workspaceEvent = nil
 local autoCollectDroppedSeedToggle = autoFarmTab:CreateToggle({
@@ -823,7 +849,6 @@ local autoFeedJimToggle = autoFarmTab:CreateToggle({
 	end,
 })
 
-
 local seedPackBackpackEvent = nil
 local autoOpenSeedPackToggle = autoFarmTab:CreateToggle({
 	Name = "Auto Open Seed Pack",
@@ -851,15 +876,14 @@ local autoOpenSeedPackToggle = autoFarmTab:CreateToggle({
 
 local hungryPlantInfo = informationTab:CreateLabel("Hungry Plant Info", 4483362458) -- Title, Icon, Color, IgnoreTheme
 
-local hungryPlantDescription = informationTab:CreateParagraph({Title = "Hungry Plant Needs", Content = "Nil"})
+local hungryPlantDescription = informationTab:CreateParagraph({ Title = "Hungry Plant Needs", Content = "Nil" })
 
 task.spawn(function()
 	while true do
 		task.wait(5)
 		if jimRequestCache ~= nil then
-			hungryPlantDescription:Set({Title = "Hungry Plant Needs", Content = jimRequestCache})
+			hungryPlantDescription:Set({ Title = "Hungry Plant Needs", Content = jimRequestCache })
 		end
-		
 	end
 end)
 
